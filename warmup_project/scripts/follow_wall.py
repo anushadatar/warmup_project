@@ -27,9 +27,10 @@ class Wall_Follower_Node(object):
         self.robot_direction = 1
         self.window = 30
         self.scan_view = []
-        self.k = 0.3
-        self.speed = 0.2
+        self.kp = 0.3
+        self.speed = 0.1
         self.error = 0
+        self.follow_distance = 1
 
         # Configure the wall visualization marker.
         self.marker = Marker()
@@ -73,21 +74,21 @@ class Wall_Follower_Node(object):
         self.scan_view = []
 
         total_range = list(range(0,self.window)) + list(range(360 - self.window, 360))
-        for point in range(0,self.window):
+        for point in total_range:
             msg_distance = msg.ranges[point]
             if msg_distance == 0.0: 
                 continue
-            elif msg_distance < 0.5:
+            elif msg_distance < self.follow_distance:
                 self.wall_visible = True
                 if point <= self.window:
                     self.scan_view.append([msg_distance, point*math.pi/180])
                 else:
-                    self.wall.scan_view([msg_distance, (point-360)*math.pi/180])
+                    self.scan_view.append([msg_distance, (point-360)*math.pi/180])
 
         if self.wall_visible:
             # Sort the scan view so we can start at the closest point.
             self.scan_view.sort(key=lambda item: item[0])
-            self.error = 1/self.scan_view[0][0]
+            self.error = 1/(self.follow_distance - self.scan_view[0][0])
             self.create_wall_marker()
             self.determine_turn_direction_and_speed()
 
@@ -96,7 +97,7 @@ class Wall_Follower_Node(object):
         while not rospy.is_shutdown():
             if self.wall_visible:
                 # TODO This needs to be a real proportional controller
-                self.next_move_msg.angular.z = self.robot_direction*self.k*self.error
+                self.next_move_msg.angular.z = self.robot_direction*self.kp*self.error
             else:
                 self.next_move_msg.linear.x = self.speed
                 self.next_move_msg.angular.z = 0.0
