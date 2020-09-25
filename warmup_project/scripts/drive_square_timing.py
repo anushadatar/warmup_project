@@ -39,4 +39,3 @@ class Drive_Square_Node():
 if __name__ == "__main__":
     drive_square = Drive_Square_Node()
     drive_square.run()
-                     

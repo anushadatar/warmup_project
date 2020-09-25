@@ -6,11 +6,11 @@ import math
 from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped, PoseArray, Pose, Twist, Vector3, Quaternion, Point
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
-from tf.transformations import euler_from_quaternion, rotation_matrix, quaternion_from_matrix
+from tf.transformations import euler_from_quaternion, 
 from visualization_msgs.msg import Marker
 
 class Wall_Follower_Node(object):
-    """ TODO """
+    """ Node associated with wall following.  """
     def __init__(self):
         """ TODO """
         rospy.init_node('Wall_Follow')
@@ -53,7 +53,7 @@ class Wall_Follower_Node(object):
         self.robot_position.z = rotational_axes[2] #yaw
 
     def create_wall_marker(self):
-        """ TODO """
+        """ Find the position"""
         self.marker.header.stamp = rospy.Time.now()
         x = self.scan_view[0][0]*math.cos(self.scan_view[0][1])
         y = self.scan_view[0][0]*math.sin(self.scan_view[0][1])
