@@ -25,9 +25,9 @@ class Wall_Follower_Node(object):
         self.robot_position = Vector3(x=0, y=0, z=0) # Z axis is yaw
         self.next_move_msg = Twist(linear=Vector3(x=0), angular=Vector3(z=0))
         self.robot_direction = 1
-        self.window = 30
+        self.window = 45
         self.scan_view = []
-        self.kp = 0.3
+        self.kp = 0.1
         self.speed = 0.1
         self.error = 0
         self.follow_distance = 1
@@ -78,17 +78,19 @@ class Wall_Follower_Node(object):
             msg_distance = msg.ranges[point]
             if msg_distance == 0.0: 
                 continue
-            elif msg_distance < self.follow_distance:
+            elif msg_distance < self.follow_distance*2:
                 self.wall_visible = True
+                # Adjust so the range is [-window, window]
                 if point <= self.window:
                     self.scan_view.append([msg_distance, point*math.pi/180])
                 else:
                     self.scan_view.append([msg_distance, (point-360)*math.pi/180])
+          
 
         if self.wall_visible:
             # Sort the scan view so we can start at the closest point.
             self.scan_view.sort(key=lambda item: item[0])
-            self.error = 1/(self.follow_distance - self.scan_view[0][0])
+            self.error = self.follow_distance - self.scan_view[0][0]
             self.create_wall_marker()
             self.determine_turn_direction_and_speed()
 
