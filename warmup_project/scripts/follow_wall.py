@@ -6,7 +6,7 @@ import math
 from geometry_msgs.msg import PoseStamped, PoseWithCovarianceStamped, PoseArray, Pose, Twist, Vector3, Quaternion, Point
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
-from tf.transformations import euler_from_quaternion, 
+from tf.transformations import euler_from_quaternion
 from visualization_msgs.msg import Marker
 
 class Wall_Follower_Node(object):
@@ -52,7 +52,7 @@ class Wall_Follower_Node(object):
         self.robot_position.y = msg.pose.pose.position.y
         self.robot_position.z = rotational_axes[2] #yaw
 
-    def create_wall_marker(self):
+    def createWallMarker(self):
         """ Find the position"""
         self.marker.header.stamp = rospy.Time.now()
         x = self.scan_view[0][0]*math.cos(self.scan_view[0][1])
@@ -61,7 +61,7 @@ class Wall_Follower_Node(object):
         self.marker.pose.position.x = self.robot_position.x+y
         self.marker.pose.position.y = self.robot_position.y-x
    
-    def determine_turn_direction_and_speed(self):
+    def determineTurnDirectionAndSpeed(self):
         """ TODO """
         if self.scan_view[0][1] < 0.0: 
             self.robot_direction = 1
@@ -91,14 +91,13 @@ class Wall_Follower_Node(object):
             # Sort the scan view so we can start at the closest point.
             self.scan_view.sort(key=lambda item: item[0])
             self.error = self.follow_distance - self.scan_view[0][0]
-            self.create_wall_marker()
-            self.determine_turn_direction_and_speed()
+            self.createWallMarker()
+            self.determineTurnDirectionAndSpeed()
 
     def run(self):
         """TODO"""
         while not rospy.is_shutdown():
             if self.wall_visible:
-                # TODO This needs to be a real proportional controller
                 self.next_move_msg.angular.z = self.robot_direction*self.kp*self.error
             else:
                 self.next_move_msg.linear.x = self.speed
