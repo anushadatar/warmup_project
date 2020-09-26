@@ -10,19 +10,19 @@ from geometry_msgs.msg import Twist, Vector3
 
 class Teleop_Node():
     """
-    Node associated with WASD-based neato teleoperation.
+    Node for WASD-based neato teleoperation.
     """
     def __init__(self):
         """
         Kick off teleop node and associated cmd_vel publisher.
         """
-        rospy.init_node('neato_teleop')
+        rospy.init_node('Teleop')
         self.settings = termios.tcgetattr(sys.stdin)
         self.key = None
         # Publish to cmd_vel based on the command input.
         self.pub = rospy.Publisher("cmd_vel", Twist, queue_size=10)
 
-        # Movement commands based on Twist message type.
+        # Movement commands.
         self.forward = Twist(Vector3(1,0,0), Vector3(0,0,0))
         self.backward = Twist(Vector3(-1,0,0), Vector3(0,0,0))
         self.stop = Twist(Vector3(0,0,0), Vector3(0,0,0))
@@ -51,6 +51,11 @@ class Teleop_Node():
 
 
     def getKey(self):
+        """
+        Get keyboard input in gazebo. Copied from project assignment, which
+        is available online at:
+        https://comprobo20.github.io/assignments/warmup_project
+        """
         tty.setraw(sys.stdin.fileno())
         select.select([sys.stdin], [], [], 0)
         key = sys.stdin.read(1)
