@@ -8,57 +8,78 @@ from sensor_msgs.msg import LaserScan
 from visualization_msgs.msg import Marker
 
 class Avoid_Obstacles_Node(object):
-    """ TODO """
+    """ 
+    Use potential fields to move forward while avoiding obstacles.
+    Specifically, this node uses the LaserScan input to compute the total
+    sum of repelling forces associated with objects in the path of the robot
+    and then uses proportional control to adjust the linear velocity and
+    steering parameters of the robot.
+    """
     def __init__(self):
-        """ TODO """
+        """ 
+        Initialize ROS, proportional control, and potential fields parameters.
+        """
+        # ROS Parameters.
         rospy.init_node('Avoid_Obstacles')
         self.r = rospy.Rate(10)
         self.scan_sub = rospy.Subscriber('/scan', LaserScan, self.analyzeScan)
-       # self.odom_sub = rospy.Subscriber('/odom', Odometry, self.updatePosUsingOdom)
         self.vel_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
 
-        self.robot_position = Vector3(x=0, y=0, z=0) # Z axis is angle
+        # Controller Parameters.
         self.speed = 0.2
         self.next_move_msg = Twist(linear=Vector3(x=self.speed), angular=Vector3(z=0))
-        # TODO this needs some pretty serious tuning
-        self.kp_distance = 0.1
-        self.kp_angle = 0.7
-        self.window = 90
+        # TODO Improve tuning creating and pushing rosbag.
+        self.kp_distance = 0.1 # Proportional constant for linear speed.
+        self.kp_angle = 0.7 # Proportional constant for steering.
         
-        # Potential fields
-        self.desired_distance = 1
-        self.threshold = 3
-        self.desired_angle = 0
-        self.potential_spread = 1
-        self.potential_radius = 0
-        self.potential_total = self.potential_spread + self.potential_radius
-        self.potential_offset = 0.1
+        # Potential Fields Parameters.
+        self.force_threshold = 3 # Cutoff for pos vs. neg force.
+        self.potential_offset = 0.1 # Weight for each object.
 
     def analyzeScan(self, data):
-        """ TODO """ 
-        total_x_value = 0
+        """
+        Use potential fields to characterize obstacles and update the robot's
+        next move to avoid the obstacles and continue moving forward. Acts as
+        the callback function for the LaserScan subscriber.
+
+        Args:
+        data: Incoming LaserScan messages.
+
+        Returns:
+        Void. Updates self.next_move_msg with new values based on scan.
+        """ 
+        # Cumulative sums of forces.
+        total_x_value= 0
         total_y_value = 0
        
-        for i in range(0, 360):
-            if (data.ranges[i] < self.threshold) and (data.ranges[i] != 0.0):
-                x = data.ranges[i]*math.cos(math.radians(i))
-                y = data.ranges[i]*math.sin(math.radians(i))
+        for scan_angle, value in enumerate(data.ranges):
+            if (value < self.force_threshold) and (value != 0.0):
+                x = value*math.cos(math.radians(scan_angle))
+                y = value*math.sin(math.radians(scan_angle))
                 distance = math.sqrt(math.pow(x,2) + math.pow(y,2))
-                difference = self.potential_total - distance
-                if difference > 0:
-                    angle = math.atan2(y, x)
-                    total_x_value += -self.potential_offset*difference*math.cos(angle)
-                    total_y_value += -self.potential_offset*difference*math.sin(angle)
-        total_x_value += self.desired_distance
+                # Adjust angle if necessary.
+                if distance < 1:
+                    robot_angle = math.atan2(y, x)
+                    # Get "other side" of distance by subtracting from 1.
+                    total_x_value += -self.potential_offset*(1 - distance)*math.cos(robot_angle)
+                    total_y_value += -self.potential_offset*(1 - distance)*math.sin(robot_angle)
+        # Positive force for foward motion.
+        total_x_value += self.force_threshold
+        
+        # Find next move messages, offset by proportional constant.
+        # TODO Add integral and derivative?
         self.next_move_msg.linear.x = math.sqrt(math.pow(total_x_value,2) + math.pow(total_y_value,2))*self.kp_distance
         self.next_move_msg.angular.z = math.atan2(total_y_value,total_x_value)*self.kp_angle
 
     def run(self):
-        """ TODO """
+        """ 
+        Run the potential fields obstacle avoidance algorithm by publishing the
+        next_move_msg which is constantly updated by the callback function
+        Avoid_Obstacles_Node.analyzeScan.
+        """
         while not rospy.is_shutdown():
-            # Literally just publish the velocity.
             self.vel_pub.publish(self.next_move_msg)
-            # TODO Add visualization
+            # TODO Add visualization, even if just the largest field or scan.
             self.r.sleep()
 
 
