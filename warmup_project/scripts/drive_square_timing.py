@@ -29,7 +29,7 @@ class Drive_Square_Node():
         self.pub.publish(self.neato_stop)
         rospy.sleep(2)
         self.pub.publish(self.neato_forward)
-        rospy.sleep(2)
+        rospy.sleep(1)
         self.pub.publish(self.neato_turn)
         rospy.sleep(2)
 
