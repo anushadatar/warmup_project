@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-""" This script makes a robot avoid obstacles"""
 import rospy
 import math
 
@@ -28,12 +27,11 @@ class Avoid_Obstacles_Node(object):
         # Controller Parameters.
         self.speed = 0.2
         self.next_move_msg = Twist(linear=Vector3(x=self.speed), angular=Vector3(z=0))
-        # TODO Improve tuning creating and pushing rosbag.
-        self.kp_distance = 0.1 # Proportional constant for linear speed.
-        self.kp_angle = 0.7 # Proportional constant for steering.
+        self.kp_distance = 0.3 # Proportional constant for linear speed.
+        self.kp_angle = 0.5 # Proportional constant for steering.
         
         # Potential Fields Parameters.
-        self.force_threshold = 3 # Cutoff for pos vs. neg force.
+        self.force_threshold = 1 # Cutoff for pos vs. neg force.
         self.potential_offset = 0.1 # Weight for each object.
 
     def analyzeScan(self, data):
@@ -67,7 +65,6 @@ class Avoid_Obstacles_Node(object):
         total_x_value += self.force_threshold
         
         # Find next move messages, offset by proportional constant.
-        # TODO Add integral and derivative?
         self.next_move_msg.linear.x = math.sqrt(math.pow(total_x_value,2) + math.pow(total_y_value,2))*self.kp_distance
         self.next_move_msg.angular.z = math.atan2(total_y_value,total_x_value)*self.kp_angle
 
@@ -79,7 +76,6 @@ class Avoid_Obstacles_Node(object):
         """
         while not rospy.is_shutdown():
             self.vel_pub.publish(self.next_move_msg)
-            # TODO Add visualization, even if just the largest field or scan.
             self.r.sleep()
 
 
