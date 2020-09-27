@@ -8,7 +8,7 @@ from sensor_msgs.msg import LaserScan
 from visualization_msgs.msg import Marker
 
 class Avoid_Obstacles_Node(object):
-    """ 
+    """
     Use potential fields to move forward while avoiding obstacles.
     Specifically, this node uses the LaserScan input to compute the total
     sum of repelling forces associated with objects in the path of the robot
