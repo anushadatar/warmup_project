@@ -33,12 +33,12 @@ class Person_Follower_Node(object):
         self.y_center = 0 # Y coordinate of the center of mass.
         self.next_move_msg = Twist(linear=Vector3(x=0), angular=Vector3(z=0))        
         # TODO Still need to be tuned.
-        self.kp_speed = 0.5 # Proportional constant for forward speed.
-        self.kp_angle = 0.8 # Proportional constant for angle.
-        self.speed = 0.2 # Default linear speed.
-        self.robot_direction = 1 # Robot direction.
-        self.follow_distance = 1 # Distance from person to follow at.
-        self.offset = 10000
+        self.kp_speed = 0.7 # Proportional constant for forward speed.
+        self.kp_angle = 0.4 # Proportional constant for angle.
+        self.speed = 1.4 # Default linear speed, cut by kp.
+        self.error = 0 # Error for controller, should default to 0
+        self.follow_distance = 0.05 # Distance from person to follow at.
+        self.max_speed = 0.3
 
         # Marker parameters.
         self.person_marker = Marker()
@@ -103,16 +103,14 @@ class Person_Follower_Node(object):
         Approach the detected center of mass, if one has been detected.
         Otherwise, simply continue moving forward.
         """
-        if self.distanceFromRobot()*self.offset > self.follow_distance:
-            self.robot_direction = 1
+        if self.distanceFromRobot() > self.follow_distance:
             if self.y_center != 0:
                 # Turn if needed.
-                self.next_move_msg.linear.x = self.kp_speed*self.robot_direction*self.speed
                 self.next_move_msg.angular.z = self.kp_angle*math.tanh(self.x_center/self.y_center)
             else:
                 # Otherwise go straight.
-                self.next_move_msg.linear.x = self.robot_direction*self.speed*self.kp_speed
                 self.next_move_msg.angular.z = 0
+            self.next_move_msg.linear.x = self.kp_speed*self.speed*(self.distanceFromRobot() - self.follow_distance)
         else:
             # Stop if too close.
             self.next_move_msg.linear.x = 0
@@ -134,7 +132,7 @@ class Person_Follower_Node(object):
         Returns the distance between the robot's position and the perceived
         center of mass.
         """
-        return math.sqrt((self.x_center - self.robot_position.x)**2 + (self.y_center - self.robot_position.y)**2)
+        return math.sqrt((self.x_center)**2 + (self.y_center)**2)
 
     def run(self):
         """
@@ -147,6 +145,8 @@ class Person_Follower_Node(object):
             self.findPerson()
             self.visCenterOfMass()
             self.approachPerson()
+            if self.next_move_msg.linear.x > self.max_speed:
+                self.next_move_msg.linear.x = self.max_speed
             self.pub_vel.publish(self.next_move_msg)
             self.r.sleep()
 
