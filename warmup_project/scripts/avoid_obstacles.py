@@ -59,8 +59,8 @@ class Avoid_Obstacles_Node(object):
                 if distance < 1:
                     robot_angle = math.atan2(y, x)
                     # Get "other side" of distance by subtracting from 1.
-                    total_x_value += -self.potential_offset*(1 - distance)*math.cos(robot_angle)
-                    total_y_value += -self.potential_offset*(1 - distance)*math.sin(robot_angle)
+                    total_x_value -= self.potential_offset*(1 - distance)*math.cos(robot_angle)
+                    total_y_value -= self.potential_offset*(1 - distance)*math.sin(robot_angle)
         # Positive force for foward motion.
         total_x_value += self.force_threshold
         
