@@ -82,7 +82,7 @@ The main design considerations here involved the difficulty of tuning the contro
 ### Problem Description
 The robot should continuously move forward while avoiding obstacles in its path.
 ### Strategy and Solution
-I used the potential fields method to implement obstacle avoidance. To do so, I subscribed to the laser scan data stream and computed the cartesian distance between the point on the data point recorded by the laser scanner and the robot. I kept a rolling sum of the total forces in terms of the x (`total_x_value`) and y (`total_y_value`) directions, and then subtracted this sum from the total forward force ('force_threshold). The diagram below shows the overall strategy.
+I used the potential fields method to implement obstacle avoidance. To do so, I subscribed to the laser scan data stream and computed the cartesian distance between the point on the data point recorded by the laser scanner and the robot. I kept a rolling sum of the total forces in terms of the x (`total_x_value`) and y (`total_y_value`) directions, and then subtracted this sum from the total forward force (`force_threshold`). The diagram below shows the overall strategy.
 
 ![Avoid Obstacles Diagram](https://github.com/anushadatar/warmup_project/blob/master/report_visuals/potential_fields.jpg "Avoid Obstacles Diagram")
 
