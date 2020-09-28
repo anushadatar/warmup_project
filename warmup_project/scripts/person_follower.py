@@ -32,7 +32,6 @@ class Person_Follower_Node(object):
         self.x_center = 0 # X coordinate of the center of mass.
         self.y_center = 0 # Y coordinate of the center of mass.
         self.next_move_msg = Twist(linear=Vector3(x=0), angular=Vector3(z=0))        
-        # TODO Still need to be tuned.
         self.kp_speed = 0.7 # Proportional constant for forward speed.
         self.kp_angle = 0.3 # Proportional constant for angle.
         self.speed = 1.4 # Default linear speed, cut by kp.
@@ -84,7 +83,6 @@ class Person_Follower_Node(object):
         x_coords = []
         y_coords = []
         for angle in range(0, 360):
-            angle %= 360
             if not math.isinf(self.scan_ranges[angle]):
                 x_coords.append(self.scan_ranges[angle] * math.sin(angle))
                 y_coords.append(self.scan_ranges[angle] * math.cos(angle))
