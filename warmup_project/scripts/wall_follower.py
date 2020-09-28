@@ -95,8 +95,7 @@ class Wall_Follower_Node(object):
         total_range = list(range(0,self.window)) + list(range(360 - self.window, 360))
         for point in total_range:
             msg_distance = msg.ranges[point]
-            if msg_distance == 0.0:
-                # Throw out any zeroes.
+            if msg_distance == 0.0 or msg_distance == float('inf') or msg_distance == float('-inf'):
                 continue
             if msg_distance < self.follow_distance*2:    
                 self.wall_visible = True
