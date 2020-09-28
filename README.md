@@ -1,6 +1,14 @@
 # FA20 Computational Robotics Warmup Project
 For this warmup project, I followed the specifications of [this assignment document](https://comprobo20.github.io/assignments/warmup_project) to implement a variety of behaviors in python using ROS and a simulated mobile robot. 
 
+# Implemented Behaviors
+- [Robot Teleop](#robot-teleop)
+- [Drive in a Square](#drive-in-a-square)
+- [Follow a Wall](#follow-a-wall)
+- [Follow a Person](#follow-a-person)
+- [Avoid Objects](#avoid-objects)
+- [Finite State Controller](#finite-state-control)
+
 ## [Robot Teleop](https://github.com/anushadatar/warmup_project/blob/master/warmup_project/scripts/teleop.py)
 ### Problem Description
 Write a program to control the robot using the keyboard.
@@ -22,8 +30,11 @@ When I initialized the node, I created a class attribute for each potential dire
 | d             	| Twist(Vector3(-1, 0, 0), Vector3(0, 0, 0)) 	| Drive Backwards 	|
 | no input      	| Twist(Vector3(0, 0, 0), Vector3(0, 0, 0))  	| Stop            	|
 
-#### Design Decisions and Debugging
+### Design Decisions and Debugging
 Here, the major design decision I had to make involved how to store the messages associated with the keys and execute on them. While I considered using more sophisticated data structures, like a map of key values and message values, I decided a set of conditional statements within the `run()` function was the appropriate level of program complexity given the simplicity of this specific program.
+
+### Demonstration
+![Teleop Demo](https://github.com/anushadatar/warmup_project/blob/master/report_visuals/teleop.gif "Teleop Gif")
 
 ## [Drive in a Square](https://github.com/anushadatar/warmup_project/blob/master/warmup_project/scripts/drive_square.py)
 ### Problem Description
@@ -41,6 +52,9 @@ The diagrams below display how the state tracker and its execution work.
 ### Design Decisions and Debugging
 One initial decision I made was to implement this program using odometry data instead of timing data. While this was definitely more work, I felt that it was appropriate because I wanted my square to be more accurate and metrics-driven than what the timing-based approach could offer. I also had to design the state controller to be as simple as possible while still allowing for the appropriate functionality - I wanted to make sure I was maintaing only the variables I needed while still performing as expected.
 
+### Demonstration
+![Drive Square Demo](https://github.com/anushadatar/warmup_project/blob/master/report_visuals/drive_square.gif "Drive Square Gif")
+
 ## [Follow a Wall](https://github.com/anushadatar/warmup_project/blob/master/warmup_project/scripts/wall_follower.py)
 ### Problem Description
 The robot should visualize and drive parallel to the closest wall.
@@ -49,6 +63,9 @@ I leveraged laser scan data to find and track the nearest wall, and I used odome
 
 ### Design Decisions and Debugging
 - For each behavior, describe the problem at a high-level. Include any relevant diagrams that help explain your approach.  Discuss your strategy at a high-level and include any tricky decisions that had to be made to realize a successful implementation.
+
+### Demonstration
+![Wall Follower Demo](https://github.com/anushadatar/warmup_project/blob/master/report_visuals/wall_follow.gif "Wall Follower Gif")
 
 ## [Follow a Person](https://github.com/anushadatar/warmup_project/blob/master/warmup_project/scripts/person_follower.py)
 ### Problem Description
@@ -59,9 +76,12 @@ I used the center of mass approach to implement person following.
 
 - For each behavior, describe the problem at a high-level. Include any relevant diagrams that help explain your approach.  Discuss your strategy at a high-level and include any tricky decisions that had to be made to realize a successful implementation.
 
+### Demonstration
+![Person Follower Demo](https://github.com/anushadatar/warmup_project/blob/master/report_visuals/follow_person.gif "Person Follower Gif")
+
 ## [Avoid Objects](https://github.com/anushadatar/warmup_project/blob/master/warmup_project/scripts/avoid_obstacles.py)
 ### Problem Description
-The robot should move forward while avoiding obstacles in its path.
+The robot should move continuously move forward while avoiding obstacles in its path.
 ### Strategy and Solution
 I used the potential fields method to implement obstacle avoidance. To do so, I subscribed to the laser scan data stream and computed the cartesian distance between the point on the data point recorded by the laser scanner and the robot. I kept a rolling sum of the total forces in terms of the x (`total_x_value`) and y (`total_y_value`) directions, and then subtracted this sum from the total forward force ('force_threshold). The diagram below shows the overall strategy.
 
@@ -71,6 +91,9 @@ From there, I used a set of manually-tuned proportional controllers to adjust th
 
 ### Design Decisions and Debugging
 The main design decision I had to make here was to determine the appropriate thresholds and offsets necessary for the positive and negative forces so that I could ensure that the robot continued moving forward and appropriately avoided obstacles. I determined this value manually through trial error.
+
+### Demonstration
+![Avoid Obstacles Demo](https://github.com/anushadatar/warmup_project/blob/master/report_visuals/avoid_obstacles.gif "Avoid Obstacles Gif")
 
 ## [Finite State Control](https://github.com/anushadatar/warmup_project/blob/master/warmup_project/scripts/finite_state_controller.py)
 ### Problem Description
@@ -93,6 +116,10 @@ My finite state controller used two state variables - `go_straight_state` and `w
 | False            	| False                 	| Turn 90 degrees                	|
 The state diagram below displays these states.
 ![Finite State Controller Diagram](https://github.com/anushadatar/warmup_project/blob/master/report_visuals/fsc_diagram.jpg "Finite State Controller Diagrams")
+
+### Demonstration
+![Finite State Controller Demo](https://github.com/anushadatar/warmup_project/blob/master/report_visuals/fsc.gif "Finite State Controller Gif")
+
 
 ## Overall Code Structure
 In general, each of my programs is an independent ROS node. Each node's filename should correspond to its function, and each node's class name should match the filename and use capital letters and underscores to separate words (for example, `do_something.py` should contain a node called `Do_Something_Node`). Each node's initialization function should contain publishers and subscribers named for their functionality, and it should also contain any parameters used by multiple functions. These parameter definitions should either be self-explanatory or documented with a comment, and they should be organized by the functionality they correspond to (i.e. ROS setup should go together, proportional control constants should go together, etc.). Each subscriber should have a callback function that updates the appropriate class variable; as these are called often, they should stay lightweight unless they are directly related to robot state (like in the case of the finite state controller). Each node should also have a run function that executes other, smaller functions to realize expected behavior. Unless they are general utility functions (like functions that convert between coordinate systems or calculate distances), they should use class attributes instead of parameters.
