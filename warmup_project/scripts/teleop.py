@@ -29,6 +29,18 @@ class Teleop_Node():
         self.left = Twist(Vector3(0,0,0), Vector3(0,0,1))
         self.right = Twist(Vector3(0,0,0), Vector3(0,0,-1))
 
+    def getKey(self):
+        """
+        Get keyboard input in gazebo. Copied from project assignment, which
+        is available online at:
+        https://comprobo20.github.io/assignments/warmup_project
+        """
+        tty.setraw(sys.stdin.fileno())
+        select.select([sys.stdin], [], [], 0)
+        key = sys.stdin.read(1)
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.settings)
+        return key
+    
     def run(self):
         """
         Process incoming command sequences from the keyboard.
@@ -48,19 +60,6 @@ class Teleop_Node():
             else:
                 self.pub.publish(self.stop)
         print('Program terminated.')
-
-
-    def getKey(self):
-        """
-        Get keyboard input in gazebo. Copied from project assignment, which
-        is available online at:
-        https://comprobo20.github.io/assignments/warmup_project
-        """
-        tty.setraw(sys.stdin.fileno())
-        select.select([sys.stdin], [], [], 0)
-        key = sys.stdin.read(1)
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.settings)
-        return key
 
 if __name__ == "__main__":
     teleop = Teleop_Node()
