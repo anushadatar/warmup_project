@@ -16,11 +16,7 @@ Write a program to control the robot using the keyboard.
 ### Strategy and Solution
 Creating the teleop program required both getting keyboard input and translating that keyboard input into robot movement.
 
-#### Getting Keyboard Input
-I leveraged [existing skeleton code](https://comprobo20.github.io/assignments/warmup_project) to get non-blocking keyboard input using termios, tty, select, and sys.stdin. The node constantly gets the next keystroke, confirms that its value does not correspond to quitting the program, and then executes on the action associated with the input key.
-
-#### Translate Keyboard Input into Movement
-When I initialized the node, I created a class attribute for each potential direction with the velocity message associated with the keystroke and the associated robot direction. The node's `run()` function gets the most recent keystroke and publishes the message associated with the keystroke. The table below shows each keystroke, message definition, and action.
+I leveraged [existing skeleton code](https://comprobo20.github.io/assignments/warmup_project) to get non-blocking keyboard input using termios, tty, select, and sys.stdin. The node constantly gets the next keystroke, confirms that its value does not correspond to quitting the program, and then executes on the action associated with the input key. Then, when I initialized the node, I created a class attribute for each potential direction with the velocity message associated with the keystroke and the associated robot direction. The node's `run()` function gets the most recent keystroke and publishes the message associated with the keystroke. The table below shows each keystroke, message definition, and action.
 
 | **Keystroke** 	| **Message**                                	| **Outcome**     	|
 |---------------	|--------------------------------------------	|-----------------	|
@@ -59,8 +55,8 @@ One initial decision I made was to implement this program using odometry data in
 ### Problem Description
 The robot should visualize and drive parallel to the closest wall.
 ### Strategy and Solution
-I leveraged laser scan data to find and track the nearest wall, and I used odometry data to track the position of the robot so that I could accurately place a marker at the location of the wall. After checking both sides of the robot's scanning window (`self.window`), I store any point that falls within double the following dsitance `2*self.follow_distance` in an array of scanned points (`self.scan_view`) that I arrange such that the range of angles stored are from `[-self.window, self.window]`. 
-After ensuring that there is a wall visible, I sort `self.scan_ranges` by value so that I can find the point on the wall that is closest to the robot. I then calculate the difference between the robot's following distance and this closest point to find the error for a proportional controller to adjust the steering angle of the robot. I also visualized the scanned values as a marker for visualization and debugging. The diagram below shows the relationship between the scanning window, the `self.scan_view` array, and the calculated error.
+I leveraged laser scan data to find and track the nearest wall, and I used odometry data to track the position of the robot so that I could accurately place a marker at the location of the wall. After checking both sides of the robot's scanning window (`window`), I store any point that falls within double the following dsitance `2*follow_distance` in an array of scanned points (`scan_view`) that I arrange such that the range of angles stored are from `[-window, window]`. 
+After ensuring that there is a wall visible, I sort `scan_ranges` by value so that I can find the point on the wall that is closest to the robot. I then calculate the difference between the robot's following distance and this closest point to find the error for a proportional controller to adjust the steering angle of the robot. I also visualized the scanned values as a marker for visualization and debugging. The diagram below shows the relationship between the scanning window, the `scan_view` array, and the calculated error.
 
 ![Wall Follower Diagram](https://github.com/anushadatar/warmup_project/blob/master/report_visuals/wall_follow.jpg "Wall Follower Diagrams")
 
@@ -74,10 +70,10 @@ The main design decision I made here involved how to sample the points received 
 ### Problem Description
 The robot should follow the closest person at a specified distance.
 ### Strategy and Solution
-I used the center of mass approach to implement person following.
-### Design Decisions and Debugging
+I used the center of mass approach to implement person following. This process requires three discrete steps: finding the person, visualizing the center of mass in rviz, and then approaching the person. To find the person, I subscribed to the laser scan data input. For any angle with valid data, I computed the cartesian distance between the point on the data point recorded by the laser scanner and the robot. I kept a rolling average of the center point in terms of the x (`x_center`) and y (`y_center`) values. To visualize the center of mass, I placed a marker to represent the center of mass, and I offset its position by the coordinates of the robot so that it would appear in the proper location. To approach the person, I calculated the difference between the perceived center of mass and the robot's position and tuned a set of proportional controllers to adjust the velocity and angle of the robot to follow the object at the specified distance.
 
-- For each behavior, describe the problem at a high-level. Include any relevant diagrams that help explain your approach.  Discuss your strategy at a high-level and include any tricky decisions that had to be made to realize a successful implementation.
+### Design Decisions and Debugging
+The main design considerations here involved the difficulty of tuning the controller when using a strategy as error-prone as center of mass. I often got distance values that were much larger or smaller than expected, and I had to carefully tune my parameters to make my program as robust as possible. 
 
 ### Demonstration
 ![Person Follower Demo](https://github.com/anushadatar/warmup_project/blob/master/report_visuals/follow_person.gif "Person Follower Gif")
