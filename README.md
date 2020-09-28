@@ -55,7 +55,7 @@ One initial decision I made was to implement this program using odometry data in
 ### Problem Description
 The robot should visualize and drive parallel to the closest wall.
 ### Strategy and Solution
-I leveraged laser scan data to find and track the nearest wall, and I used odometry data to track the position of the robot so that I could accurately place a marker at the location of the wall. After checking both sides of the robot's scanning window (`window`), I store any point that falls within double the following dsitance `2*follow_distance` in an array of scanned points (`scan_view`) that I arrange such that the range of angles stored are from `[-window, window]`. 
+I leveraged laser scan data to find and track the nearest wall, and I used odometry data to track the position of the robot so that I could accurately place a marker at the location of the wall. After checking both sides of the robot's scanning window (`window`), I store any point that falls within double the following distance `2*follow_distance` in an array of scanned points (`scan_view`) that I arrange such that the range of angles stored are from `[-window, window]`. 
 After ensuring that there is a wall visible, I sort `scan_ranges` by value so that I can find the point on the wall that is closest to the robot. I then calculate the difference between the robot's following distance and this closest point to find the error for a proportional controller to adjust the steering angle of the robot. I also visualized the scanned values as a marker for visualization and debugging. The diagram below shows the relationship between the scanning window, the `scan_view` array, and the calculated error.
 
 ![Wall Follower Diagram](https://github.com/anushadatar/warmup_project/blob/master/report_visuals/wall_follow.jpg "Wall Follower Diagrams")
@@ -80,7 +80,7 @@ The main design considerations here involved the difficulty of tuning the contro
 
 ## [Avoid Objects](https://github.com/anushadatar/warmup_project/blob/master/warmup_project/scripts/avoid_obstacles.py)
 ### Problem Description
-The robot should move continuously move forward while avoiding obstacles in its path.
+The robot should continuously move forward while avoiding obstacles in its path.
 ### Strategy and Solution
 I used the potential fields method to implement obstacle avoidance. To do so, I subscribed to the laser scan data stream and computed the cartesian distance between the point on the data point recorded by the laser scanner and the robot. I kept a rolling sum of the total forces in terms of the x (`total_x_value`) and y (`total_y_value`) directions, and then subtracted this sum from the total forward force ('force_threshold). The diagram below shows the overall strategy.
 
@@ -164,4 +164,4 @@ Many of the bugs I handled while working on this project were due to my failure 
 
 3. Document as you go.
 
-One mistake I made during this project was saving the majority of documentation of functionality to the very end of the project (especially for deliverables like recorded rosbags). I justified this by noting that my project would be most finished closer to the deadline, and I should document the most final version of the project. This proved problematic when I had issues with gazebo the night before the project was due, and also created a lot of work that was fairly easy to deprioritize in favor of spending time tuning the program before worrying about recording. Realisitically, however, recording a rosbag is a trivial task, and taking the time to do it while working is a great way to stay on top of documentation requirements and to hold a record of previous robot performance to compare improved programs to.
+One mistake I made during this project was saving the majority of documentation of functionality to the very end of the project (especially for deliverables like recorded rosbags). I justified this by noting that my project would be most finished closer to the deadline, and I should document the most final version of the project. This proved problematic when I had issues with gazebo the night before the project was due, and also created a lot of work that was fairly easy to deprioritize in favor of spending time tuning the program before worrying about recording. Realistically, however, recording a rosbag is a trivial task, and taking the time to do it while working is a great way to stay on top of documentation requirements and to hold a record of previous robot performance to compare improved programs to.
