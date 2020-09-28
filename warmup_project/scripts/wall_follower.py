@@ -122,7 +122,6 @@ class Wall_Follower_Node(object):
                     self.robot_direction = 1
                 else:
                     self.robot_direction = -1
-                # TODO Maybe make this integral and derivative as well?
                 self.next_move_msg.angular.z = self.robot_direction*self.kp*self.error
             else:
                 self.next_move_msg.linear.x = self.speed
