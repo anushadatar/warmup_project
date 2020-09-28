@@ -8,10 +8,10 @@ Write a program to control the robot using the keyboard.
 ### Strategy and Solution
 Creating the teleop program required both getting keyboard input and translating that keyboard input into robot movement.
 
-### Getting Keyboard Input
+#### Getting Keyboard Input
 I leveraged [existing skeleton code](https://comprobo20.github.io/assignments/warmup_project) to get non-blocking keyboard input using termios, tty, select, and sys.stdin. The node constantly gets the next keystroke, confirms that its value does not correspond to quitting the program, and then executes on the action associated with the input key.
 
-### Translate Keyboard Input into Movement
+#### Translate Keyboard Input into Movement
 When I initialized the node, I created a class attribute for each potential direction with the velocity message associated with the keystroke and the associated robot direction. The node's `run()` function gets the most recent keystroke and publishes the message associated with the keystroke. The table below shows each keystroke, message definition, and action.
 
 | **Keystroke** 	| **Message**                                	| **Outcome**     	|
@@ -22,7 +22,7 @@ When I initialized the node, I created a class attribute for each potential dire
 | d             	| Twist(Vector3(-1, 0, 0), Vector3(0, 0, 0)) 	| Drive Backwards 	|
 | no input      	| Twist(Vector3(0, 0, 0), Vector3(0, 0, 0))  	| Stop            	|
 
-### Design Decisions and Debugging
+#### Design Decisions and Debugging
 Here, the major design decision I had to make involved how to store the messages associated with the keys and execute on them. While I considered using more sophisticated data structures, like a map of key values and message values, I decided a set of conditional statements within the `run()` function was the appropriate level of program complexity given the simplicity of this specific program.
 
 ## [Drive in a Square](https://github.com/anushadatar/warmup_project/blob/master/warmup_project/scripts/drive_square.py)
@@ -31,11 +31,15 @@ The robot should autonomously travel in a 1 meter by 1 meter square.
 ### Strategy and Solution
 As a first pass, I implemented this program using timing. In the [timing-based solution](https://github.com/anushadatar/warmup_project/blob/master/warmup_project/scripts/drive_square.py), I measured how long it would take the robot to drive 1 meter and turn 90 degrees, and I hardcoded the velocity messages I needed to publish to drive in a square.
 
-Afterwards, I developed a solution using odometry data. To do that, I created a simple state tracker using the variable `go_straight_state`, and I wrote method called `driveStraight()` and `driveRight()`.
+Afterwards, I developed a solution using odometry data. I created a class attribute to store the robot's position, and I wrote a callback for the Odometry data subscriber that constantly updated the robot's position. By tracking the position and publishing velocity messages accordingly, I drive the robot in a 1x1 square.
+
+#### State Controller
+Driving in a square requires combining two unique states- driving forward and turning right. The robot starts by storing its initial position as a reference, and then it drives until its position exceeds the initial position and the side length. Then, it sets its current orientation a reference, and then turns until its orientation exceeds the initial orientation and 90 degrees. Then, it stores its new, current position as a reference and repeats this process.
+The diagrams below display how the state tracker and its execution work.
+![Drive Square Diagrams](https://github.com/anushadatar/warmup_project/blob/master/report_visuals/draw_square_diagram.jpg "Drive Square Diagrams")
 
 ### Design Decisions and Debugging
-One initial decision I made was to implement this program using odometry data instead of timing data. While this was definitely more work, I felt that it was appropriate because I wanted my square to be more accurate than what
-- For each behavior, describe the problem at a high-level. Include any relevant diagrams that help explain your approach.  Discuss your strategy at a high-level and include any tricky decisions that had to be made to realize a successful implementation.
+One initial decision I made was to implement this program using odometry data instead of timing data. While this was definitely more work, I felt that it was appropriate because I wanted my square to be more accurate and metrics-driven than what the timing-based approach could offer. I also had to design the state controller to be as simple as possible while still allowing for the appropriate functionality - I wanted to make sure I was maintaing only the variables I needed while still performing as expected/
 
 ## [Follow a Wall](https://github.com/anushadatar/warmup_project/blob/master/warmup_project/scripts/wall_follower.py)
 ### Problem Description
