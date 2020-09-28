@@ -61,12 +61,16 @@ I used the center of mass approach to implement person following.
 
 ## [Avoid Objects](https://github.com/anushadatar/warmup_project/blob/master/warmup_project/scripts/avoid_obstacles.py)
 ### Problem Description
-The robot should move forward while avoiding obstacles.
+The robot should move forward while avoiding obstacles in its path.
 ### Strategy and Solution
-I used the potential fields method to implement obstacle avoidance. 
-### Design Decisions and Debugging
+I used the potential fields method to implement obstacle avoidance. To do so, I subscribed to the laser scan data stream and computed the cartesian distance between the point on the data point recorded by the laser scanner and the robot. I kept a rolling sum of the total forces in terms of the x (`total_x_value`) and y (`total_y_value`) directions, and then subtracted this sum from the total forward force ('force_threshold). The diagram below shows the overall strategy.
 
-- For each behavior, describe the problem at a high-level. Include any relevant diagrams that help explain your approach.  Discuss your strategy at a high-level and include any tricky decisions that had to be made to realize a successful implementation.
+![Avoid Obstacles Diagram](https://github.com/anushadatar/warmup_project/blob/master/report_visuals/potential_fields.jpg "Avoid Obstacles Diagram")
+
+From there, I used a set of manually-tuned proportional controllers to adjust the forward velocity and angle of the robot according to the value of the overall negative force.
+
+### Design Decisions and Debugging
+The main design decision I had to make here was to determine the appropriate thresholds and offsets necessary for the positive and negative forces so that I could ensure that the robot continued moving forward and appropriately avoided obstacles. I determined this value manually through trial error.
 
 ## [Finite State Control](https://github.com/anushadatar/warmup_project/blob/master/warmup_project/scripts/finite_state_controller.py)
 ### Problem Description
