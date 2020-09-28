@@ -113,6 +113,7 @@ My finite state controller used two state variables - `go_straight_state` and `w
 | True             	| False                 	| Follow entire wall             	|
 | False            	| True                  	| Drive straight for side length 	|
 | False            	| False                 	| Turn 90 degrees                	|
+
 The state diagram below displays these states.
 ![Finite State Controller Diagram](https://github.com/anushadatar/warmup_project/blob/master/report_visuals/fsc_diagram.jpg "Finite State Controller Diagrams")
 
