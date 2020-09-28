@@ -34,7 +34,7 @@ class Person_Follower_Node(object):
         self.next_move_msg = Twist(linear=Vector3(x=0), angular=Vector3(z=0))        
         # TODO Still need to be tuned.
         self.kp_speed = 0.7 # Proportional constant for forward speed.
-        self.kp_angle = 0.4 # Proportional constant for angle.
+        self.kp_angle = 0.3 # Proportional constant for angle.
         self.speed = 1.4 # Default linear speed, cut by kp.
         self.error = 0 # Error for controller, should default to 0
         self.follow_distance = 0.05 # Distance from person to follow at.
