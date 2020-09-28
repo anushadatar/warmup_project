@@ -1,7 +1,7 @@
 # FA20 Computational Robotics Warmup Project
 For this warmup project, I followed the specifications of [this assignment document](https://comprobo20.github.io/assignments/warmup_project) to implement a variety of behaviors in python using ROS and a simulated mobile robot. 
 
-# Implemented Behaviors
+## Implemented Behaviors
 - [Robot Teleop](#robot-teleop)
 - [Drive in a Square](#drive-in-a-square)
 - [Follow a Wall](#follow-a-wall)
@@ -59,10 +59,13 @@ One initial decision I made was to implement this program using odometry data in
 ### Problem Description
 The robot should visualize and drive parallel to the closest wall.
 ### Strategy and Solution
-I leveraged laser scan data to find and track the nearest wall, and I used odometry data to track the position of the robot. 
+I leveraged laser scan data to find and track the nearest wall, and I used odometry data to track the position of the robot so that I could accurately place a marker at the location of the wall. After checking both sides of the robot's scanning window (`self.window`), I store any point that falls within double the following dsitance `2*self.follow_distance` in an array of scanned points (`self.scan_view`) that I arrange such that the range of angles stored are from `[-self.window, self.window]`. 
+After ensuring that there is a wall visible, I sort `self.scan_ranges` by value so that I can find the point on the wall that is closest to the robot. I then calculate the difference between the robot's following distance and this closest point to find the error for a proportional controller to adjust the steering angle of the robot. I also visualized the scanned values as a marker for visualization and debugging. The diagram below shows the relationship between the scanning window, the `self.scan_view` array, and the calculated error.
+
+![Wall Follower Diagram](https://github.com/anushadatar/warmup_project/blob/master/report_visuals/wall_follow.jpg "Wall Follower Diagrams")
 
 ### Design Decisions and Debugging
-- For each behavior, describe the problem at a high-level. Include any relevant diagrams that help explain your approach.  Discuss your strategy at a high-level and include any tricky decisions that had to be made to realize a successful implementation.
+The main design decision I made here involved how to sample the points received through the laser scan. While I explored sampling multiple points at specified angles or averaging the entire scan to find the most comprehensive possible distance, I found sampling the nearest point to be the most robust and flexible solution.
 
 ### Demonstration
 ![Wall Follower Demo](https://github.com/anushadatar/warmup_project/blob/master/report_visuals/wall_follow.gif "Wall Follower Gif")
