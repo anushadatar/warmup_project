@@ -34,17 +34,18 @@ As a first pass, I implemented this program using timing. In the [timing-based s
 Afterwards, I developed a solution using odometry data. I created a class attribute to store the robot's position, and I wrote a callback for the Odometry data subscriber that constantly updated the robot's position. By tracking the position and publishing velocity messages accordingly, I drive the robot in a 1x1 square.
 
 #### State Controller
-Driving in a square requires combining two unique states- driving forward and turning right. The robot starts by storing its initial position as a reference, and then it drives until its position exceeds the initial position and the side length. Then, it sets its current orientation a reference, and then turns until its orientation exceeds the initial orientation and 90 degrees. Then, it stores its new, current position as a reference and repeats this process.
+Driving in a square requires combining two unique states- driving forward and turning right. The robot starts by storing its initial position as a reference, and then it drives until its position exceeds the initial position and the side length. Then, it sets its current orientation as a reference, and then turns until its orientation exceeds the initial orientation and 90 degrees. Then, it stores its new, current position as a reference and repeats this process.
 The diagrams below display how the state tracker and its execution work.
 ![Drive Square Diagrams](https://github.com/anushadatar/warmup_project/blob/master/report_visuals/draw_square_diagram.jpg "Drive Square Diagrams")
 
 ### Design Decisions and Debugging
-One initial decision I made was to implement this program using odometry data instead of timing data. While this was definitely more work, I felt that it was appropriate because I wanted my square to be more accurate and metrics-driven than what the timing-based approach could offer. I also had to design the state controller to be as simple as possible while still allowing for the appropriate functionality - I wanted to make sure I was maintaing only the variables I needed while still performing as expected/
+One initial decision I made was to implement this program using odometry data instead of timing data. While this was definitely more work, I felt that it was appropriate because I wanted my square to be more accurate and metrics-driven than what the timing-based approach could offer. I also had to design the state controller to be as simple as possible while still allowing for the appropriate functionality - I wanted to make sure I was maintaing only the variables I needed while still performing as expected.
 
 ## [Follow a Wall](https://github.com/anushadatar/warmup_project/blob/master/warmup_project/scripts/wall_follower.py)
 ### Problem Description
-The robot should drive parallel to the closest wall.
+The robot should visualize and drive parallel to the closest wall.
 ### Strategy and Solution
+I leveraged laser scan data to find and track the nearest wall, and I used odometry data to track the position of the robot. 
 
 ### Design Decisions and Debugging
 - For each behavior, describe the problem at a high-level. Include any relevant diagrams that help explain your approach.  Discuss your strategy at a high-level and include any tricky decisions that had to be made to realize a successful implementation.
@@ -53,7 +54,7 @@ The robot should drive parallel to the closest wall.
 ### Problem Description
 The robot should follow the closest person at a specified distance.
 ### Strategy and Solution
-
+I used the center of mass approach to implement person following.
 ### Design Decisions and Debugging
 
 - For each behavior, describe the problem at a high-level. Include any relevant diagrams that help explain your approach.  Discuss your strategy at a high-level and include any tricky decisions that had to be made to realize a successful implementation.
@@ -62,7 +63,7 @@ The robot should follow the closest person at a specified distance.
 ### Problem Description
 The robot should move forward while avoiding obstacles.
 ### Strategy and Solution
-
+I used the potential fields method to implement obstacle avoidance. 
 ### Design Decisions and Debugging
 
 - For each behavior, describe the problem at a high-level. Include any relevant diagrams that help explain your approach.  Discuss your strategy at a high-level and include any tricky decisions that had to be made to realize a successful implementation.
@@ -71,18 +72,28 @@ The robot should move forward while avoiding obstacles.
 ### Problem Description
 The robot should combine and transition between multiple behaviors using a finite state controller. I chose to combine driving in a square and following a wall.
 ### Strategy and Solution
+The finite state controller node subscribes to both laser scan and odometry input data. If the inbound laser scan includes a wall (detection performed the same way as in the wall follower node) the callback sets `wall_visible` callback to True so that the robot can start visualizing and following the wall. If `wall_visible` is not True, the robot uses the odometry data to track the robot's movement in a square. 
 
 ### Design Decisions and Debugging
-
+One critical design decision I had to make involved handling the case when a robot is driving in a square, encounters a wall, follows the wall, and then starts driving in a square again. I had to decide whether the robot should start a new square with a new reference position from the end of the wall it followed or if it should use its previous reference position to complete its original square. I decided that starting a new square would make more sense in the context of driving in a square in pursuit of a wall to follow rather than staying in place, so I created a state variable called `started_square_drive` that kept track of if there was already a square drive in place and set it to False every time a wall becomes visible and True every time the robot starts driving in a square again.
 ### Overall Behavior
+The robot drives in a square until it encounters a wall (or continuously if there are no walls visible), follows the wall and creates a marker for it until it is no longer visible, and then drives in a square again.
 
 ### State Combination and Transition
-
-- For the finite state controller, what was the overall behavior. What were the states? What did the robot do in each state? How did you combine and how did you detect when to transition between behaviors?  Consider including a state transition diagram in your writeup.
+My finite state controller used two state variables - `go_straight_state` and `wall_visible`. In general, when `wall_visible` is true, the robot should follow the visible wall. Otherwise, the robot should execute on driving in a square such `go_straight_state` is True while it moves forward and False while it turns right. As the node runs and processes incoming data, it analyzes the incoming laser scan to see if a wall is visible and uses odometry data to track the location of the wall and the progress on driving in a square. The table below shows the relationship between the state variables and the robot's behavior.
+| **wall_visible** 	| **go_straight_state** 	| **Outcome**                    	|
+|------------------	|-----------------------	|--------------------------------	|
+| True             	| True                  	| Follow entire Wall             	|
+| True             	| False                 	| Follow entire wall             	|
+| False            	| True                  	| Drive straight for side length 	|
+| False            	| False                 	| Turn 90 degrees                	|
+The state diagram below displays these states.
+![Finite State Controller Diagram](https://github.com/anushadatar/warmup_project/blob/master/report_visuals/fsc_diagram.jpg "Finite State Controller Diagrams")
 
 ## Overall Code Structure
-In general, each of my programs is an independent ROS node. Each node contains its own
-- How was your code structured? Make sure to include a sufficient detail about the object-oriented structure you used for your project.
+In general, each of my programs is an independent ROS node. Each node's filename should correspond to its function, and each node's class name should match the filename and use capital letters and underscores to separate words (for example, `do_something.py` should contain a node called `Do_Something_Node`). Each node's initialization function should contain publishers and subscribers named for their functionality, and it should also contain any parameters used by multiple functions. These parameter definitions should either be self-explanatory or documented with a comment, and they should be organized by the functionality they correspond to (i.e. ROS setup should go together, proportional control constants should go together, etc.). Each subscriber should have a callback function that updates the appropriate class variable; as these are called often, they should stay lightweight unless they are directly related to robot state (like in the case of the finite state controller). Each node should also have a run function that executes other, smaller functions to realize expected behavior. Unless they are general utility functions (like functions that convert between coordinate systems or calculate distances), they should use class attributes instead of parameters.
+
+When executed individually, a node file should create an instance of its contained node and run it. Calling the run function should be the only function call necessary to realize the behavior specified by the node name.
 
 ## Reflection
 ### Challenges
