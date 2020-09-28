@@ -1,28 +1,106 @@
 # FA20 Computational Robotics Warmup Project
+For this warmup project, I followed the specifications of [this assignment document](https://comprobo20.github.io/assignments/warmup_project) to implement a variety of behaviors in python using ROS and a simulated mobile robot. 
 
-## Telop
+## [Robot Teleop](https://github.com/anushadatar/warmup_project/blob/master/warmup_project/scripts/teleop.py)
+### Problem Description
+
+### Strategy and Solution
+
+### Design Decisions and Debugging
+
 - - For each behavior, describe the problem at a high-level. Include any relevant diagrams that help explain your approach.  Discuss your strategy at a high-level and include any tricky decisions that had to be made to realize a successful implementation.
 
-## Drive in a Square
+## [Drive in a Square](https://github.com/anushadatar/warmup_project/blob/master/warmup_project/scripts/drive_square.py)
+### Problem Description
+The robot should autonomously travel in a 1 meter by 1 meter square.
+### Strategy and Solution
+As a first pass, I implemented this program using timing. In the timing-based solution, I measured how long it
+Afterwards, I developed a solution using odometry data.
+
+### Design Decisions and Debugging
 - For each behavior, describe the problem at a high-level. Include any relevant diagrams that help explain your approach.  Discuss your strategy at a high-level and include any tricky decisions that had to be made to realize a successful implementation.
 
-## Follow a Wall
+## [Follow a Wall](https://github.com/anushadatar/warmup_project/blob/master/warmup_project/scripts/wall_follower.py)
+### Problem Description
+
+### Strategy and Solution
+
+### Design Decisions and Debugging
+
 - For each behavior, describe the problem at a high-level. Include any relevant diagrams that help explain your approach.  Discuss your strategy at a high-level and include any tricky decisions that had to be made to realize a successful implementation.
 
-## Follow a Person
+## [Follow a Person](https://github.com/anushadatar/warmup_project/blob/master/warmup_project/scripts/person_follower.py)
+### Problem Description
+
+### Strategy and Solution
+
+### Design Decisions and Debugging
+
 - For each behavior, describe the problem at a high-level. Include any relevant diagrams that help explain your approach.  Discuss your strategy at a high-level and include any tricky decisions that had to be made to realize a successful implementation.
 
-## Avoid Objects
+## [Avoid Objects](https://github.com/anushadatar/warmup_project/blob/master/warmup_project/scripts/avoid_obstacles.py)
+### Problem Description
+
+### Strategy and Solution
+
+### Design Decisions and Debugging
+
 - For each behavior, describe the problem at a high-level. Include any relevant diagrams that help explain your approach.  Discuss your strategy at a high-level and include any tricky decisions that had to be made to realize a successful implementation.
 
-## Finite State Control
+## [Finite State Control](https://github.com/anushadatar/warmup_project/blob/master/warmup_project/scripts/finite_state_controller.py)
+### Problem Description
+
+### Strategy and Solution
+
+### Design Decisions and Debugging
+
+### Overall Behavior
+
+### State Combination and Transition
+
 - For the finite state controller, what was the overall behavior. What were the states? What did the robot do in each state? How did you combine and how did you detect when to transition between behaviors?  Consider including a state transition diagram in your writeup.
 
 ## Overall Code Structure
+In general, each of my programs is an independent ROS node. Each node contains its own
 - How was your code structured? Make sure to include a sufficient detail about the object-oriented structure you used for your project.
 
 ## Reflection
-- What if any challenges did you face along the way?
-- What would you do to improve your project if you had more time?
-- What are the key takeaways from this assignment for future robotic programming projects? For each takeaway, provide a sentence or two of elaboration.
- 
+### Challenges
+There are three challenges I faced while working on this assignment.
+1. Defining problems.
+In general, I struggled with understanding what an appropriate definition of the problem statement and a complete solution was. In general, I was never quite sure what "good enough" was - was it acceptable for the wall follower to only work on one side? What was an acceptable tolerance for the accuracy of the following distance for the person followers? Having to come up with my own definitions of acceptable performance was a new and interesting challenge for me.
+
+2. Investing time in workflows vs. working on projects.
+I know that specific development improvements, such as better visualizations or dynamic parameter reconfiguration, require time upfront to implement but deliver value in future productivity. That being said, I had trouble justifying working on such tooling when I could be working on algorithms or tuning instead. Moving forward, I hope to have a better mindset about the importance of writing good tools.
+
+3. General ROS/Gazebo errors.
+I faced several issues with my ROS installation and Gazebo. While many of them had solid workarounds, I did have an unfortunately-timed Gazebo issue where the best solution I could find was to reset the world every single time I did another test; if I did not do that, the robot model would spin in a circle indefinitely. While characterizing errors and finding workarounds took time and energy, it was also an opportunity to learn more about ROS and Gazebo and a reminder to always allocate time for unforeseen issues.,
+
+### Further Extensions
+There are three major areas in which I would improve my project if I had more time.
+1. Development and debugging tools.
+
+Adding features to my programs such as dynamic parameter adjustment and richer visualizations would empower me to have a finer, more productive debugging process. Paradoxically, I often felt as though implementing structures that would simplify my workflow and increase my productivity would take too much time in and of itself. In holding that mindset, I fail to recognize that improving workflows is an investment. With more time, the first thing I would do is put structures in place to improve my workflow.
+
+2. Algorithms.
+
+For almost all of these programs, the use of more sophisticated algorithms would improve performance and be a productive learning experience. For example, my person-following algorithm could use more intelligent tracking than simply following the center of mass (like using a clustering algorithm), or my wall-following algorithm could have more nicely tracked the wall using RANSAC.
+
+3. Tuning.
+
+I tuned all of the proportional controller constants in my programs by hand over a finite amount of time. Had I had more time, I could have spent more time adding more constants (such as integral and derivative parameters) and spent more time manually tuning my programs and creating structures to introduce some automation. This would improve the performance of my existing algorithms and help me practice refining my work.
+
+### Key Takeaways
+There are three key takeaways from this assignment that I can bring to future robotics programming projects.
+
+1. Start with a clear definition of the problem and of an acceptable solution.
+
+Assignment definitions can be deceptively simple. For example, the requirement that a robot follow a wall can have a variety of meanings, as it does not specify the magnitude of turn it must handle, the range at which it should detect or follow walls, or what an acceptable level of performance is. After all, a robotics program is not a sorting algorithm; there is not necessarily a perfectly optimal solution that works in every case. As a result of this ambiguity, my problem-solving process was fairly nonlinear; I simply added features, and then I felt confused about if I had done a sufficient amount of work and then had to go back, define the problem, evaluate my solution, and then modify it to meet the requirements I created. If I had started with a well-defined problems statement and a clear (yet flexible) definition of a complete program, I would have saved a lot of time and energy.
+
+2. Investing time in visualization is worth it.
+
+Many of the bugs I handled while working on this project were due to my failure to understand the coordinate frame I was working in or the nature of the transformation I was using. Initially, I tried to debug my program through print statements, which proved exhausting and confusing. Tools like rviz helped a lot, and I wish I had gotten comfortable with using it sooner.
+
+3. Document as you go.
+
+One mistake I made during this project was saving the majority of documentation of functionality to the very end of the project (especially for deliverables like recorded rosbags). I justified this by noting that my project would be most finished closer to the deadline, and I should document the most final version of the project. This proved problematic when I had issues with gazebo the night before the project was due, and also created a lot of work that was fairly easy to deprioritize in favor of spending time tuning the program before worrying about recording. Realisitically, however, recording a rosbag is a trivial task, and taking the time to do it while working is a great way to stay on top of documentation requirements and to hold a record of previous robot performance to compare improved programs to.
